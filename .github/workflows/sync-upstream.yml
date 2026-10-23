@@ -1,6 +1,6 @@
 name: Sync upstream release + REALITY compat patch
 
-# Merges the latest XTLS/Xray-core release into main, re-applies patches/ and publishes "<tag>-compat"
+# Merges the latest XTLS/Xray-core release into the branch it runs on (the default branch for scheduled runs), re-applies patches/ and publishes "<tag>-compat"
 # with raw linux binaries usable as Remnanode's CUSTOM_CORE_URL.
 on:
   workflow_dispatch:
@@ -30,7 +30,6 @@ jobs:
       - uses: actions/checkout@v7
         if: steps.up.outputs.skip != 'true'
         with:
-          ref: main
           fetch-depth: 0
           token: ${{ secrets.SYNC_TOKEN }} # GITHUB_TOKEN cannot push upstream changes to .github/workflows
 
@@ -57,7 +56,7 @@ jobs:
           go build -o /dev/null ./main
           git add -A
           git diff --cached --quiet || git commit -m "Re-apply REALITY compat patch for ${{ steps.up.outputs.tag }}"
-          git push origin HEAD:main
+          git push origin "HEAD:${{ github.ref_name }}"
 
       - name: Build and publish release
         if: steps.up.outputs.skip != 'true'
